@@ -26,10 +26,9 @@ class KMP(object):
                 j = next[j-1]
             if txt[i] == pat[j]:
                 j += 1
-        if j == M:
-            return N - M  # 找到匹配开始处index
-        else:
-            return N  # 为找到匹配, 返回尾部index
+            if j == M:
+                return i - M + 1  # 找到匹配开始处index
+        return N  # 未找到匹配, 返回尾部index
 
 # kmp with dfa
 class KMP_DFA(object):
@@ -52,8 +51,6 @@ class KMP_DFA(object):
             X = dfa[chars.get(pat[j], 0)][X]
         j = 0
         for i in range(N):
-            if j == M or i == N:
-                break
             j = dfa[chars.get(txt[i], 0)][j]
             if j == M:
                 return i - M + 1  # 找到匹配开始处index
