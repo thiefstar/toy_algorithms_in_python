@@ -1,13 +1,14 @@
 # -*- coding:utf-8 -*-
 
+# todo: => 非递归
 
 class TrieST(object):
 
     class Node(object):
         def __init__(self):
-            self.__R = 256  # 基数
-            self.__next = [ None for _ in range(self.__R)]
-            self.__val = None
+            self.R = 256  # 基数
+            self.next = [ None for _ in range(self.R)]
+            self.val = None
     R = 256
     root = Node()
 
@@ -219,7 +220,8 @@ class TST(object):
             x = x.left
             fq.append((x, x.c))
         fq = fq[::-1]
-        x = self.root        fq.append((x, x.c))
+        x = self.root
+        fq.append((x, x.c))
         while not x.right is None:
             x = x.right
             fq.append((x, x.c))
@@ -287,10 +289,227 @@ class TST(object):
             self._collect_that_match(x.mid, pre + x.c, pat, q)
 
 
-    def delete(self):
+    def delete(self, key):
         # 类似二叉查找树的删除
+        self.root = self._delete(self.root, key, 0)
+
+
+    # 待验证
+    def _delete(self, node, key, d):
+        if node is None:
+            return None
+
+        key_len = len(key)
+
+        c = key[d]
+        if c < node.c:
+            node.left = self._delete(node.left, key, d)
+        elif c > node.c:
+            node.right = self._delete(node.right, key, d)
+        else:
+            if d == key_len - 1:
+                node.val = None
+            else:
+                node.mid = self._delete(node.mid, key, d+1)
+
+        if node.mid is None and not node.val is None:
+            if node.right is None:
+                return node.left
+            if node.left is None:
+                return node.right
+            t = node
+            # 左右节点都存在时 默认用右节点代替当前节点
+            node = node.right
+            node.left = t.left
+            return node
+        else:
+            return node
+
+
+class BST(object):
+    class Node(object):
+        def __init__(self, key, val, N):
+            self.key = key
+            self.left, self.right = None, None
+            self.val = val
+            self.N = N  # 该子数节点总数
+
+    root = None
+
+    def size(self):
+        return self._size(self.root)
+
+    def _size(self, node):
+        if node is None:
+            return 0
+        else:
+            return node.N
+
+    def get(self, key):
+        return self._get(self.root)
+
+    def _get(self, node, key):
+        if node is None:
+            return None
+        if key < node.key:
+            # key object may ned function: __lt__ & __eq__
+            return self._get(node.left, key)
+        elif key > node.key:
+            return self._get(node.right, key)
+        else:
+            return node.val
+
+    def put(self, key, val):
+        self.root = self._put(self.root, key, val)
+
+    def _put(self, node, key, val):
+        if node is None:
+            return self.Node(key, val, 1)
+        if key < node.key:
+            node.left = self._put(node.left, key, val)
+        elif key > node.key:
+            node.right = self._put(node.right, key, val)
+        else:
+            node.val = val
+        node.N = self._size(node.left) + self._size(node.right) + 1  # update the N
+        return node
+
+    def min(self):
+        return self._min(self.root)
+
+    def _min(self, node):
+        if node.left is None:
+            return node
+        return self._min(node.left)
+
+    def max(self):
+        return self._max(self.root)
+
+    def _max(self, node):
+        if node.right is None:
+            return node
+        return self._max(node.right)
+
+    # 向下取整， 不大于给定key的最大key
+    def floor(self, key):
+        x = self._floor(self.root, key)
+        if x is None:
+            return None
+        return x.key
+
+    def _floor(self, node, key):
+        if node is None:
+            return None
+        if key == node.key:
+            return node
+        if key < node.key:
+            return self._floor(node.left, key)
+        t = self._floor(node.right, key)
+        if not t is None:
+            return t
+        else:
+            return node
+
+    # 向上取整
+    def ceiling(self, key):
+        x = self._ceiling(self.root, key)
+        if x is None:
+            return None
+        return x.key
+
+    def _ceiling(self, node, key):
+        if node is None:
+            return None
+        if key == node.key:
+            return node
+        if key > node.key:
+            return self._ceiling(node.right, key)
+        t = self._ceiling(node.left, key)
+        if not t is None:
+            return t
+        else:
+            return node
+
+    def select(self, k):
+        """
+
+        :param k: k nodes smaller than this node
+        :return: node of k-th
+        """
+        return self._select(self.root, k).key
+
+    def _select(self, node, k):
+        if node is None:
+            return None
+        t = self._size(node.left)
+        if t > k:
+            return self._select(node.left, k)
+        elif t < k:
+            return self._select(node.right, k-t-1)
+        else:
+            return node
+
+    def rank(self, key):
+        """
+
+        :param key:
+        :return: 小于key的node数量
+        """
         pass
 
+    def _rank(self, node, key):
+        if node is None:
+            return 0
+        if key < node.key:
+            return self._rank(node.left, key)
+        elif key > node.key:
+            return 1 + self._size(node.left) + self._rank(node.right, key)
+        else:
+            return self._size(node.left)
+
+    def delete_min(self):
+        self.root = self._delete_min(self.root)
+
+    def _delete_min(self, node):
+        if node.left is None:
+            return node.right
+        node.left = self._delete_min(node.left)
+        node.N = self._size(node.left) + self._size(node.right) + 1
+        return node
+
+    def delete_max(self):
+        self.root = self._delete_max(self.root)
+
+    def _delete_max(self, node):
+        if node.right is None:
+            return node.left
+        node.right = self._delete_max(node.right)
+        node.N = self._size(node.left) + self._size(node.right) + 1
+        return node
+
+    def delete(self, key):
+        self.root = self._delete(self.root, key)
+
+    def _delete(self, node, key):
+        if node is None:
+            return None
+        if key < node.key:
+            node.left = self._delete(node.left, key)
+        elif key > node.key:
+            node.right = self._delete(node.right, key)
+        else:
+            if node.right is None:
+                return node.left
+            if node.left is None:
+                return node.right
+            # 如果左右子节点都存在的话
+            t = node
+            node = self._min(t.right)  # node节点删除后，该节点设为新的节点
+            node.right = self._delete_min(t.right)
+            node.left = t.left
+            # size = t.N-1 ?
+        node.N = self._size(node.left) + self._size(node.right) + 1
+        return node
 
 
 
@@ -317,4 +536,3 @@ if __name__ == "__main__":
 
     # print(t.delete("bride"))
     # print(t.delete("abandon"))
-
