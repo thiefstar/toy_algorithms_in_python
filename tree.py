@@ -346,7 +346,7 @@ class BST(object):
             return node.N
 
     def get(self, key):
-        return self._get(self.root)
+        return self._get(self.root, key)
 
     def _get(self, node, key):
         if node is None:
@@ -455,7 +455,7 @@ class BST(object):
         :param key:
         :return: 小于key的node数量
         """
-        pass
+        return self._rank(self.root, key)
 
     def _rank(self, node, key):
         if node is None:
@@ -512,27 +512,168 @@ class BST(object):
         return node
 
 
+class RedBlackBST(object):
+
+    RED = True
+    BLACK = False
+
+    root = None
+
+    class _Node(object):
+
+        left, right = None, None
+
+        def __init__(self, key, val, N, color):
+            self.key = key
+            self.val = val
+            self.N = N  # 该子数中的节点总数
+            self.color = color  # 由父节点指向它
+
+    def _is_red(self, x):
+        if x is None:
+            return False
+        return x.color == self.RED
+
+    def size(self):
+        return self._size(self.root)
+
+    def _size(self, x):
+        if x is None:
+            return 0
+        else:
+            return x.N
+
+    def rotate_left(self, h):
+        x = h.right
+        h.right = x.left
+        x.left = h
+        x.color = h.color
+        h.color = self.RED
+        x.N = h.N
+        h.N = 1 + self._size(h.left) + self._size(h.right)
+        return x
+
+    def rotate_right(self, h):
+        x = h.left
+        h.left = x.right
+        x.right = h
+        x.color = h.color
+        h.color = self.RED
+        x.N = h.N
+        h.N = 1 + self._size(h.left) + self._size(h.right)
+        return x
+    
+    def flip_colors(self, h):   # always use after rotate_right()??  
+                                # => always use when node.left and node.right are all RED
+        h.color = self.RED
+        h.left.color = self.BLACK
+        h.right.color = self.BLACK
+
+    def put(self, key, val):
+        self.root = self._put(self.root, key, val)
+        self.root.color = self.BLACK
+
+    def _put(self, h, key, val):
+        if h is None:  # RED to father node
+            return self._Node(key, val, 1, self.RED)
+
+        if key < h.key:
+            h.left = self._put(h.left, key, val)
+        elif key > h.key:
+            h.right = self._put(h.right, key, val)
+        else:
+            h.val = val
+
+        # maintain balance, after recursive call..
+        if self._is_red(h.right) and not self._is_red(h.left):
+            h = self.rotate_left(h)
+        if self._is_red(h.left) and self._is_red(h.left.left):
+            h = self.rotate_right(h)
+        if self._is_red(h.left) and self._is_red(h.right):
+            self.flip_colors(h)
+
+        h.N = self._size(h.left) + self._size(h.right) + 1
+        return h
+
+    def get(self, key):  # same as BST ?
+        return self._get(self.root, key)
+
+    def _get(self, x, key):
+        if x is None:
+            return None
+        if key < x.key:
+            # key object may ned function: __lt__ & __eq__
+            return self._get(x.left, key)
+        elif key > x.key:
+            return self._get(x.right, key)
+        else:
+            return x.val
+
+    def delete_min(self):
+        pass
+
+    def delete_max(self):
+        pass
+
+    def delete(self):
+        pass
+
+    def draw(self, fn="rb.dot"):
+        # use dot?  
+        # dot tree.dot | gvpr -c -f binarytree.gvpr | neato -n -Tpng -o tree.png
+        q_node = []
+        q_link = []
+        self._draw(self.root, q_node, q_link)
+        # dot file out:
+        with open(fn, "w") as f:
+            f.write("# dot tree.dot | gvpr -c -f binarytree.gvpr | neato -n -Tpng -o tree.png\n")
+            f.write("graph RedBlackBST {\n")
+            for item in q_node:
+                f.write('\t%s [shape="circle"]\n' % item[0])
+            f.write('\n')
+            for item in q_link:
+                if item[2] == "Red":
+                    f.write('\t%s -- %s [color=%s, penwidth=3.0];\n' % item)
+                else:
+                    f.write('\t%s -- %s [color=%s];\n' % item)
+            f.write('}')
+        print("out:%s\nto get the graph, U need to use command like: \ndot tree.dot | gvpr -c -f binarytree.gvpr | neato -n -Tpng -o tree.png" % fn)
+
+    def _draw(self, x, q_node, q_link):
+        """
+        q_node: quene of (node.key, val)
+        q_link: quene of (node.key, child.key)
+        """
+        if x is None:
+            return
+        q_node.append((x.key, x.val))
+        if x.left:
+            q_link.append((x.key, x.left.key, "Red" if x.left.color else "Black"))
+            self._draw(x.left, q_node, q_link)
+        if x.right:
+            q_link.append((x.key, x.right.key, "Red" if x.right.color else "Black"))
+            self._draw(x.right, q_node, q_link)
+
 
 if __name__ == "__main__":
 
-    t = TST()
-    t.put("apple", 1)
-    t.put("abc", 2)
-    t.put("agc", 8)
-    t.put("abandon", 3)
-    t.put("bride", 4)
-    t.put("bridegroom", 5)
-    t.put("good", 6)
-    t.put("b", 7)
+    t = RedBlackBST()
+    t.put("A", 1)
+    t.put("C", 2)
+    t.put("D", 8)
+    t.put("G", 3)
+    t.put("H", 4)
+    t.put("E", 5)
+    t.put("T", 6)
+    t.put("Y", 7)
 
-    print(t.get("good"))
-    print(t.get("ab"))
-    print(t.get("abc"))
+    print(t.get("A"))
+    print(t.get("T"))
+    print(t.get("Y"))
 
-    print(t.keys())
-    print(t.keys_with_prefix("a"))
+    t.draw()
 
-    print(t.keys_that_match("a.c"))
+    # print(t.select(3))
 
     # print(t.delete("bride"))
     # print(t.delete("abandon"))
