@@ -533,6 +533,11 @@ class RedBlackBST(object):
         if x is None:
             return False
         return x.color == self.RED
+    def _is_empty(self):
+        if self.root is None:
+            return True
+        else:
+            return False
 
     def size(self):
         return self._size(self.root)
@@ -563,7 +568,7 @@ class RedBlackBST(object):
         h.N = 1 + self._size(h.left) + self._size(h.right)
         return x
     
-    def flip_colors(self, h):   # always use after rotate_right()??  
+    def _flip_colors(self, h):   # always use after rotate_right()??  
                                 # => always use when node.left and node.right are all RED
         h.color = self.RED
         h.left.color = self.BLACK
@@ -590,7 +595,7 @@ class RedBlackBST(object):
         if self._is_red(h.left) and self._is_red(h.left.left):
             h = self.rotate_right(h)
         if self._is_red(h.left) and self._is_red(h.right):
-            self.flip_colors(h)
+            self._flip_colors(h)
 
         h.N = self._size(h.left) + self._size(h.right) + 1
         return h
@@ -609,35 +614,100 @@ class RedBlackBST(object):
         else:
             return x.val
 
+    def _flip_colors_del(self, h):
+        h.color = self.BLACK
+        h.left.color = self.RED
+        h.right.color = self.RED
+
+    def _move_red_left(self, h):
+        self._flip_colors_del(h)
+        if self._is_red(h.right.left):
+            h.right = self.rotate_right(h.right)
+            h = self.rotate_left(h)
+        return h
+
+    def _balance(self, h):
+        if self._is_red(h.right):
+            h = self.rotate_left(h)
+        if self._is_red(h.right) and not self._is_red(h.left):
+            h = self.rotate_left(h)
+        if self._is_red(h.left) and self._is_red(h.left.left):
+            h = self.rotate_right(h)
+        if self._is_red(h.left) and self._is_red(h.right):
+            self._flip_colors(h)  # ?
+
+        h.N = self._size(h.left) + self._size(h.right) + 1
+        return h
+
     def delete_min(self):
-        pass
+        if not self._is_red(self.root.left) and not self._is_red(self.root.right):
+            self.root.color = self.RED
+        self.root = self._delete_min(self.root)
+        if not self._is_empty():
+            self.root.color = self.BLACK
+
+    def _delete_min(self, h):
+        if h.left is None:  # h is the min node
+            return None
+        if not self._is_red(h.left) and not self._is_red(h.left.left):
+            h = self._move_red_left(h)
+        h.left = self._delete_min(h.left)
+        return self._balance(h)
+
+    def _move_red_right(self, h):
+        self._flip_colors_del(h)
+        if not self._is_red(h.left.left):
+            h = self.rotate_right(h)
+        return h
 
     def delete_max(self):
-        pass
+        if not self._is_red(self.root.left) and not self._is_red(self.root.right):
+            self.root.color = self.RED
+        self.root = self._delete_max(self.root)
+        if not self._is_empty():
+            self.root.color = self.BLACK
+
+    def _delete_max(self, h):
+        if self._is_red(h.left):
+            h = self.rotate_right(h)
+        if h.right is None:
+            return None
+        if not self._is_red(h.right) and not self._is_red(h.right.left):
+            h = self._move_red_right(h)
+        h.right = self._delete_max(h.right)
+        return self._balance(h)
 
     def delete(self):
         pass
 
-    def draw(self, fn="rb.dot"):
-        # use dot?  
+    def draw(self, fn="rb"):
+        fn = fn + ".dot"
+        # have a great relationship with node order!  ==> probelm!?
         # dot tree.dot | gvpr -c -f binarytree.gvpr | neato -n -Tpng -o tree.png
         q_node = []
         q_link = []
+        count = 0  # NULL nodes' count
         self._draw(self.root, q_node, q_link)
         # dot file out:
         with open(fn, "w") as f:
             f.write("# dot tree.dot | gvpr -c -f binarytree.gvpr | neato -n -Tpng -o tree.png\n")
             f.write("graph RedBlackBST {\n")
-            for item in q_node:
-                f.write('\t%s [shape="circle"]\n' % item[0])
-            f.write('\n')
             for item in q_link:
                 if item[2] == "Red":
                     f.write('\t%s -- %s [color=%s, penwidth=3.0];\n' % item)
-                else:
+                elif item[2] == "Black":
                     f.write('\t%s -- %s [color=%s];\n' % item)
+                else:
+                    f.write('\t%s -- %s%s [style=%s];\n' % (item[0], item[1], count, item[2]))
+                    count += 1
+            f.write('\n')
+            for item in q_node:
+                f.write('\t%s [shape="circle"];\n' % item[0])
+            for i in range(count):
+                f.write('\tNULL%s [style="invis"];\n' % i)
+
             f.write('}')
-        print("out:%s\nto get the graph, U need to use command like: \ndot tree.dot | gvpr -c -f binarytree.gvpr | neato -n -Tpng -o tree.png" % fn)
+        print("out:%s\nto get the graph, U need to use command like: \ndot %s | gvpr -c -f binarytree.gvpr | neato -n -Tpng -o %s.png" % (fn, fn, fn[:-4]))
 
     def _draw(self, x, q_node, q_link):
         """
@@ -647,13 +717,18 @@ class RedBlackBST(object):
         if x is None:
             return
         q_node.append((x.key, x.val))
+        if not x.left and not x.right:
+            return
         if x.left:
             q_link.append((x.key, x.left.key, "Red" if x.left.color else "Black"))
             self._draw(x.left, q_node, q_link)
+        else:
+            q_link.append((x.key, "NULL", "invis"))
         if x.right:
             q_link.append((x.key, x.right.key, "Red" if x.right.color else "Black"))
             self._draw(x.right, q_node, q_link)
-
+        else:
+            q_link.append((x.key, "NULL", "invis"))
 
 if __name__ == "__main__":
 
@@ -672,6 +747,12 @@ if __name__ == "__main__":
     print(t.get("Y"))
 
     t.draw()
+
+    t.delete_max()
+    t.draw("del_max_rb1")
+
+    t.delete_max()
+    t.draw("del_max_rb2")
 
     # print(t.select(3))
 
