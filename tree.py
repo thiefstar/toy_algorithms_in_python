@@ -548,6 +548,14 @@ class RedBlackBST(object):
         else:
             return x.N
 
+    def min(self):
+        return self._min(self.root)
+
+    def _min(self, x):
+        if x.left is None:
+            return x
+        return self._min(x.left)
+
     def rotate_left(self, h):
         x = h.right
         h.right = x.left
@@ -677,12 +685,37 @@ class RedBlackBST(object):
         h.right = self._delete_max(h.right)
         return self._balance(h)
 
-    def delete(self):
-        pass
+    def delete(self, key):
+        if not self._is_red(self.root.left) and not self._is_red(self.root.right):
+            self.root.color = self.RED
+        self.root = self._delete(self.root, key)
+        if not self._is_empty():
+            self.root.color = self.BLACK
+
+    def _delete(self, h, key):
+        if key < h.key:
+            if not self._is_red(h.left) and not  self._is_red(h.left.left):
+                h = self._move_red_left(h)
+            h.left = self._delete(h.left, key)
+        else:
+            if self._is_red(h.left):
+                h = self.rotate_right(h)
+            if key == h.key and h.right is None:
+                return None
+            if not self._is_red(h.right) and not self._is_red(h.right.left):
+                h = self._move_red_right(h)
+            if key == h.key:
+                h.val = self._get(h.right, self._min(h.right).key)
+                h.key = self._min(h.right).key
+                h.right = self._delete_min(h.right)
+            else:
+                h.right = self._delete(h.right, key)
+        return self._balance(h)
+
 
     def draw(self, fn="rb"):
         fn = fn + ".dot"
-        # have a great relationship with node order!  ==> probelm!?
+        # have a great relationship with node order!  
         # dot tree.dot | gvpr -c -f binarytree.gvpr | neato -n -Tpng -o tree.png
         q_node = []
         q_link = []
@@ -707,7 +740,8 @@ class RedBlackBST(object):
                 f.write('\tNULL%s [style="invis"];\n' % i)
 
             f.write('}')
-        print("out:%s\nto get the graph, U need to use command like: \ndot %s | gvpr -c -f binarytree.gvpr | neato -n -Tpng -o %s.png" % (fn, fn, fn[:-4]))
+        print("out:%s\nto get the graph, U need to use command like:"
+            " \ndot %s | gvpr -c -f binarytree.gvpr | neato -n -Tpng -o %s.png" % (fn, fn, fn[:-4]))
 
     def _draw(self, x, q_node, q_link):
         """
@@ -730,6 +764,11 @@ class RedBlackBST(object):
         else:
             q_link.append((x.key, "NULL", "invis"))
 
+class BTreeSET(object):
+    pass
+
+
+
 if __name__ == "__main__":
 
     t = RedBlackBST()
@@ -748,11 +787,8 @@ if __name__ == "__main__":
 
     t.draw()
 
-    t.delete_max()
-    t.draw("del_max_rb1")
-
-    t.delete_max()
-    t.draw("del_max_rb2")
+    t.delete("T")
+    t.draw("del")
 
     # print(t.select(3))
 
