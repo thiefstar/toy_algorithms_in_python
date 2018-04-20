@@ -15,9 +15,9 @@ import math
 
 MIN_FLOAT = -3.14e100
 
-PROB_START_P = "prob_start.plk"
-PROB_TRANS_P = "prob_trans.plk"
-PROB_EMIT_P = "prob_emit.plk"
+PROB_START_P = "prob_start.pkl"
+PROB_TRANS_P = "prob_trans.pkl"
+PROB_EMIT_P = "prob_emit.pkl"
 
 def build_datafile(fn, with_tagging=False):
     """
