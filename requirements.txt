@@ -1,0 +1,3 @@
+jieba==0.38
+fasttext==0.8.22
+opencc-python-reimplemented==0.1.3
