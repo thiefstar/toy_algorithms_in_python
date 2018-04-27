@@ -2,6 +2,7 @@
 
 # basic
 # flickering.cn/nlp/2014/06/日文分词器-mecab-文档/  + 品詞体系
+# http://taku910.github.io/mecab/
 # https://www.taodocs.com/p-85211904.html 
 #
 # http://ictclas.nlpir.org/nlpir/html/readme.htm (ictclas计算所汉语词性标记集)
@@ -127,7 +128,7 @@ def my_split(string):
     pack_queue = re.findall(pack_pattern, string)
     string = re.sub(pack_pattern, SIGN, string)
 
-    pattern = re.compile('(?<=[。？！])')
+    pattern = re.compile('(?<=[。？！])(?![。？！])')
     result = []
     while string != '':
         s = re.search(pattern, string)
@@ -216,3 +217,6 @@ if __name__ =='__main__':
     #         count += 1
 
     # pynlpir.close()
+
+    sent = "真是渣渣！！！！！我好无语啊。。。。。都是什么啊，，，，"
+    print(my_split(sent))
