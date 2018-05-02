@@ -1,1 +1,25 @@
-├── edit_distance.py # 两张Damerau-Levenshtein Distance的实现<br />├── hmm<br />│ ├── hmm.py # hmm的学习算法实现: 监督与非监督学习<br />│ ├── prob_emit.pkl<br />│ ├── prob_start.pkl<br />│ ├── prob_trans.pkl<br />│ ├── viterbi_hmm.py # hmm预测算法实现: 近似算法与viterbi算法<br />│ └── word_seg.py # 利用viterbi算法分词<br />├── metrics # MT评测算法实现<br />│ ├── bleu.py<br />│ ├── nist.py<br />│ └── rouge.py<br />├── sentiment # 情感判别<br />│ ├── fasttext.py<br />│ ├── naive_bayes.py <br />│ └──  readme.txt # fastText 训练数据, 模型<br />├── aligner # 句, 词对齐<br />│ ├── zh_jp_sent_aligner.py<br />│ └── readme.txt<br />├── prime.py # 素性测试与随机素数生成<br />├── priority_queue.py # 优先队列实现(算法学习, 包括最大优先队列和最小索引优先队列)<br />├── substring_find.py # 子字符串查找实现(算法学习, 包括KMP算法的next数组方式实现和DFA表实现, Boyer Moore算法, Rabin Karp算法)<br />├── huffman_tree.py&nbsp; # 霍夫曼树(压缩文本)<br />└── tree.py # 树的实现(算法学习, 包括Trie树, 三向单词查找树, 二叉查找树和红黑树)
++ edit_distance.py  # 两张Damerau-Levenshtein Distance的实现
++ hmm
+  - hmm.py  # hmm的学习算法实现: 监督与非监督学习
+  - prob_emit.pkl 
+  - rob_start.pkl
+  - prob_trans.pkl
+  - viterbi_hmm.py  # hmm预测算法实现: 近似算法与viterbi算法
++ word_seg.py  # 利用viterbi算法分词
++ metrics  # MT评测算法实现
+  - bleu.py
+  - nist.py 
+  - rouge.py 
++ sentiment # 情感判别
+  - fasttext.py 
+  - naive_bayes.py 
+  - readme.txt  # fastText 训练数据, 模型
++ aligner  # 句, 词对齐 
+  - zh_jp_sent_aligner.py 
+  - readme.txt
++ seq2seq  # NMT model
++ prime.py  # 素性测试与随机素数生成
++ priority_queue.py  # 优先队列实现(算法学习, 包括最大优先队列和最小索引优先队列)
++ substring_find.py  # 子字符串查找实现(算法学习, 包括KMP算法的next数组方式实现和DFA表实现, Boyer Moore算法, Rabin Karp算法)
++ huffman_tree.py  # 霍夫曼树(压缩文本) 
++ tree.py  # 树的实现(算法学习, 包括Trie树, 三向单词查找树, 二叉查找树和红黑树)
