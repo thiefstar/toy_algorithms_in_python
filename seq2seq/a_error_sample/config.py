@@ -19,10 +19,7 @@ class Config():
         self.learning_rate = 0.001
         self.display_step = 20
         # Path & File
-        # self.path = "/mnt/datahouse/text-data/niutrans-zh-en"
-        self.path = "/home/helm/workspace/spider-work/duilian"
-        # self.source_fn = "chinese.raw.txt"
-        # self.target_fn = "english.raw.txt"
+        self.path = "duilian"
         self.source_fn = "data/train.enc"
         self.target_fn = "data/train.dec"
         self.source_path = os.path.join(self.path, self.source_fn)
