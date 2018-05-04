@@ -17,7 +17,8 @@
 + aligner  # 句, 词对齐 
   - zh_jp_sent_aligner.py 
   - readme.txt
-+ seq2seq  # NMT model
++ seq2seq  # NMT model (tf)
++ ner-tf  # 命名实体识别 (tf)
 + prime.py  # 素性测试与随机素数生成
 + priority_queue.py  # 优先队列实现(算法学习, 包括最大优先队列和最小索引优先队列)
 + substring_find.py  # 子字符串查找实现(算法学习, 包括KMP算法的next数组方式实现和DFA表实现, Boyer Moore算法, Rabin Karp算法)
