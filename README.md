@@ -24,3 +24,4 @@
 + substring_find.py  # 子字符串查找实现(算法学习, 包括KMP算法的next数组方式实现和DFA表实现, Boyer Moore算法, Rabin Karp算法)
 + huffman_tree.py  # 霍夫曼树(压缩文本) 
 + tree.py  # 树的实现(算法学习, 包括Trie树, 三向单词查找树, 二叉查找树和红黑树)
++ hanzi_info  # 获得汉字笔画数、部首
